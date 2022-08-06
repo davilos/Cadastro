@@ -1,7 +1,8 @@
+from time import sleep
 from passlib.hash import pbkdf2_sha256 as cryp
 from csv import writer, reader
-from tkinter import *
 import os
+from tkinter import *
 
 
 class Cadastro:
@@ -49,41 +50,131 @@ class User(Cadastro):
 def cadastrar():
     with open('usuarios.csv', 'a+', encoding='utf8', newline='') as arq:
         esc_csv = writer(arq)
-        if os.path.exists('cadastro/usuarios.csv'):
+        if os.path.exists('usuarios.csv'):
             pass
         else:
             esc_csv.writerow(["Nome", "Email", "Senha"])
 
-        while (opcao_c := input('Digite sair caso queira parar: ').lower()) != 'sair':
-            print('\033[1;97mCADASTRO\033[m')
-            nome_cadastro = input('Digite o nome: ')
+        janela.destroy()
+        janela_cadastro = Tk()
 
-            if nome_cadastro != '':
-                email_cadastro = input('Digite o e-mail: ')
+        texto_cadastro = Label(
+            janela_cadastro,
+            text='CADASTRO',
+        ).grid(column=0, row=0, padx=10, pady=10, sticky='nswe', columnspan=4)
+        nome_texto = Label(
+            janela_cadastro,
+            text='Digite o seu nome de usuário',
+        ).grid(column=0, row=1, padx=10, pady=10, sticky='nswe', columnspan=4)
 
-                if '@' and '.com' in email_cadastro:
-                    senha_cadastro = input('Digite a senha: ')
+        def func_nome():
+            if entry_nome.get() != '':
+                with open('usuarios.csv', 'r+') as arq2:
+                    lei_csv = reader(arq2)
+                    for n in lei_csv:
+                        verificador = 0
+                        if str(entry_nome.get()).title() == n[0]:
+                            verificador += 1
+                            texto_user_exit = Label(
+                                janela_cadastro,
+                                text='Usuário já cadastrado!',
+                                foreground='red'
+                            ).grid(column=0, row=4, padx=10, pady=10,
+                                   sticky='nswe', columnspan=4)
+                email_texto = Label(
+                    janela_cadastro,
+                    text='Digite o seu email',
+                ).grid(column=0, row=1, padx=10, pady=10,
+                       sticky='nswe', columnspan=4)
 
-                    if len(senha_cadastro) >= 8:
-                        user = User(nome_cadastro, email_cadastro,
-                                    senha_cadastro)
-                        with open('cadastro/usuarios.csv', 'r+') as arq2:
-                            lei_csv = reader(arq2)
-                            for n in lei_csv:
-                                verificador = 0
-                                if user.nome.title() == n[0] or user.email.title() == n[1]:
-                                    verificador += 1
-                                    print('Usuário ou e-mail já cadastrados!')
-                                    break
-                                if verificador == 0:
-                                    esc_csv.writerow([user.nome, user.email,
-                                                     user.senha])
-                    else:
-                        print('\033[31mDigite uma senha mais forte!\033[m')
-                else:
-                    print('\033[31mDigite um e-mail válido!\033[m')
+                global entry_email
+                entry_email = Entry(janela_cadastro)
+                entry_email.grid(column=0, row=2, padx=10, pady=10,
+                                 sticky='nswe', columnspan=4)
+                botao_email = Button(janela_cadastro, text='Continuar',
+                                     command=func_email).grid(column=0, row=3,
+                                                              padx=60, pady=10,
+                                                              sticky='nswe',
+                                                              columnspan=4)
             else:
-                print('\033[31mNome indisponível!\033[m')
+                texto_erro_nome = Label(
+                    janela_cadastro,
+                    text='Nome inválido',
+                    foreground='red'
+                ).grid(column=0, row=1, padx=10, pady=10,
+                       sticky='nswe', columnspan=4)
+
+        def func_email():
+            global email_cadastro
+            email_cadastro = entry_email.get()
+
+            if email_cadastro[0] != '@' and email_cadastro[-4:] == '.com' and \
+               email_cadastro[-11:-4] == 'hotmail' or \
+               email_cadastro[-9:-4] == 'gmail' and '@' in email_cadastro:
+                with open('usuarios.csv', 'r+') as arq2:
+                    lei_csv = reader(arq2)
+                    for n in lei_csv:
+                        verificador = 0
+                        if str(entry_email.get()).title() == n[1]:
+                            verificador += 1
+                            texto_user_exit = Label(
+                                janela_cadastro,
+                                text='Email já cadastrado!',
+                                foreground='red'
+                            ).grid(column=0, row=4, padx=10, pady=10,
+                                   sticky='nswe', columnspan=4)
+                senha_texto = Label(
+                    janela_cadastro,
+                    text='Crie uma senha',
+                ).grid(column=0, row=1, padx=10, pady=10,
+                       sticky='nswe', columnspan=4)
+
+                global entry_senha
+                entry_senha = Entry(janela_cadastro)
+                entry_senha.grid(column=0, row=2, padx=10, pady=10,
+                                 sticky='nswe', columnspan=4)
+                botao_senha = Button(janela_cadastro, text='Continuar',
+                                     command=func_senha).grid(column=0, row=3,
+                                                              padx=60, pady=10,
+                                                              sticky='nswe',
+                                                              columnspan=4)
+            else:
+                texto_erro_email = Label(
+                    janela_cadastro,
+                    text='Email inválido!',
+                    foreground='red'
+                ).grid(column=0, row=1, padx=10, pady=10,
+                       sticky='nswe', columnspan=4)
+
+        def func_senha():
+            if len(entry_senha.get()) >= 8:
+                texto_cadastro_fim = Label(
+                    janela_cadastro,
+                    text='Cadastro efetuado! Feche a janela.'
+                ).grid(column=0, row=4, padx=10, pady=10,
+                       sticky='nswe', columnspan=4)
+                user = User(entry_nome.get(), entry_email.get(),
+                            entry_senha.get())
+                esc_csv.writerow([
+                    user.nome, user.email,
+                    user.senha])
+            else:
+                texto_erro_senha = Label(
+                    janela_cadastro,
+                    text='Digite uma senha mais forte',
+                    foreground='red'
+                ).grid(column=0, row=1, padx=10, pady=10,
+                       sticky='nswe', columnspan=4)
+
+        entry_nome = Entry(janela_cadastro)
+        entry_nome.grid(column=0, row=2, padx=10, pady=10,
+                        sticky='nswe', columnspan=4)
+        botao_nome = Button(janela_cadastro, text='Continuar',
+                            command=func_nome).grid(column=0, row=3, padx=60,
+                                                    pady=10, sticky='nswe',
+                                                    columnspan=4)
+        janela_cadastro.mainloop()
+        janela_principal()
 
 
 def logar():
@@ -93,7 +184,7 @@ def logar():
         option = input('Digite o nome de usuário ou o email: ')
         password = input('Digite a senha: ')
         if '@' and '.com' in option:
-            with open('cadastro/usuarios.csv') as arq:
+            with open('usuarios.csv') as arq:
                 lei_csv = reader(arq)
                 verificador = 0
                 for n in lei_csv:
@@ -107,11 +198,12 @@ def logar():
                     print('\033[31mE-mail ou senha incorretos\033[m')
 
         else:
-            with open('cadastro/usuarios.csv') as arq:
+            with open('usuarios.csv') as arq:
                 lei_csv = reader(arq)
                 verificador = 0
                 for n in lei_csv:
-                    if option.title() == n[0].title() and cryp.verify(password, n[2]):
+                    if option.title() == n[0].title() \
+                     and cryp.verify(password, n[2]):
                         verificador += 1
                         print(f'Seja bem-vindo {n[0]}')
                     else:
@@ -121,8 +213,33 @@ def logar():
                     print('\033[31mUsuário ou senha incorretos\033[m')
         print(f'\033[1;97m{attempts} tentativas restantes.\033[1;97m')
     print('\033[31mLimite de tentativas excedido!\033[m')
+    janela_principal()
 
 
-janela = Tk()
-janela.title('Cadastro')
-janela.mainloop()
+def janela_principal():
+    global janela
+    janela = Tk()
+    janela.title('Cadastro')
+
+    texto_orientacao = Label(
+        janela,
+        text='Você deseja cadastrar ou logar?',
+    ).grid(column=0, row=0, padx=10, pady=10, sticky='nswe', columnspan=4)
+
+    botao_c = Button(
+        janela,
+        text='Cadastrar',
+        command=cadastrar
+    ).grid(column=0, row=1, padx=60, pady=10, sticky='nswe', columnspan=4)
+
+    botao_l = Button(
+        janela,
+        text='Logar',
+        command=logar
+    ).grid(column=0, row=2, padx=60, pady=10, sticky='nswe', columnspan=4)
+
+    janela.mainloop()
+
+
+if __name__ == '__main__':
+    janela_principal()
