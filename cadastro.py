@@ -1,9 +1,6 @@
-from time import sleep
-from turtle import width
 from passlib.hash import pbkdf2_sha256 as cryp
 from csv import writer, reader
 import os
-from datetime import datetime, timedelta
 from tkinter import *
 
 
@@ -51,6 +48,9 @@ class User(Cadastro):
 
 def cadastrar():
     with open('usuarios.csv', 'a+', encoding='utf8', newline='') as arq:
+        global exist_user, exist_email, cadastrado
+        exist_user, exist_email, cadastrado = False, False, False
+
         esc_csv = writer(arq)
         if os.path.exists('usuarios.csv'):
             pass
@@ -77,31 +77,41 @@ def cadastrar():
             if entry_nome.get() != '':
                 with open('usuarios.csv', 'r+') as arq2:
                     lei_csv = reader(arq2)
+                    verificador = 0
                     for n in lei_csv:
-                        verificador = 0
-                        if str(entry_nome.get()).title() == n[0]:
+                        if str(entry_nome.get()).upper() == n[0].upper():
                             verificador += 1
-                            texto_user_exit = Label(
-                                janela_cadastro,
-                                text='Usuário já cadastrado!',
-                                foreground='red'
-                            ).grid(column=0, row=4, padx=10, pady=10,
-                                   sticky='nswe', columnspan=4)
-                email_texto = Label(
-                    janela_cadastro,
-                    text='Digite o seu email'
-                ).grid(column=0, row=1, padx=10, pady=10,
-                       sticky='nswe', columnspan=4)
+                            global exist_user
+                            if exist_user:
+                                pass
+                            else:
+                                global texto_user_exist
+                                texto_user_exist = Label(
+                                    janela_cadastro,
+                                    text='Usuário já cadastrado!',
+                                    foreground='red'
+                                )
+                                texto_user_exist.grid(column=0, row=4, padx=10,
+                                                      pady=10, sticky='nswe',
+                                                      columnspan=4)
+                                exist_user = True
 
-                global entry_email
-                entry_email = Entry(janela_cadastro)
-                entry_email.grid(column=0, row=2, padx=10, pady=10,
-                                 sticky='nswe', columnspan=4)
-                botao_email = Button(janela_cadastro, text='Continuar',
-                                     command=func_email).grid(column=0, row=3,
-                                                              padx=60, pady=10,
-                                                              sticky='nswe',
-                                                              columnspan=4)
+                if verificador == 0:
+                    texto_user_exist.destroy()
+                    email_texto = Label(
+                        janela_cadastro,
+                        text='Digite o seu email'
+                    ).grid(column=0, row=1, padx=10, pady=10,
+                           sticky='nswe', columnspan=4)
+
+                    global entry_email
+                    entry_email = Entry(janela_cadastro)
+                    entry_email.grid(column=0, row=2, padx=10, pady=10,
+                                     sticky='nswe', columnspan=4)
+                    botao_email = Button(janela_cadastro, text='Continuar',
+                                         command=func_email)
+                    botao_email.grid(column=0, row=3, padx=60, pady=10,
+                                     sticky='nswe', columnspan=4)
             else:
                 texto_erro_nome = Label(
                     janela_cadastro,
@@ -119,37 +129,56 @@ def cadastrar():
             global email_cadastro
             email_cadastro = entry_email.get()
 
-            if email_cadastro[0] != '@' and email_cadastro[-4:] == '.com' and \
-               email_cadastro[-11:-4] == 'hotmail' or \
-               email_cadastro[-9:-4] == 'gmail' and '@' in email_cadastro:
-                with open('usuarios.csv', 'r+') as arq2:
-                    lei_csv = reader(arq2)
-                    for n in lei_csv:
-                        verificador = 0
-                        if str(entry_email.get()).title() == n[1]:
-                            verificador += 1
-                            texto_user_exit = Label(
-                                janela_cadastro,
-                                text='Email já cadastrado!',
-                                foreground='red'
-                            ).grid(column=0, row=4, padx=10, pady=10,
-                                   sticky='nswe', columnspan=4)
-                senha_texto = Label(
-                    janela_cadastro,
-                    text='Crie uma senha'
-                ).grid(column=0, row=1, padx=10, pady=10,
-                       sticky='nswe', columnspan=4)
+            try:
+                if email_cadastro[0] != '@' and email_cadastro[-4:] == '.com' \
+                 and email_cadastro[-11:-4] == 'hotmail' or \
+                 email_cadastro[-9:-4] == 'gmail' and '@' in email_cadastro:
+                    with open('usuarios.csv', 'r+') as arq2:
+                        lei_csv = reader(arq2)
+                        for n in lei_csv:
+                            verificador = 0
+                            if str(entry_email.get()).upper() == n[1].upper():
+                                verificador += 1
+                                global exist_email
+                                if exist_email:
+                                    pass
+                                else:
+                                    global texto_email_exist
+                                    texto_email_exist = Label(
+                                        janela_cadastro,
+                                        text='Email já cadastrado!',
+                                        foreground='red'
+                                    )
+                                    texto_email_exist.grid(column=0, row=4,
+                                                           padx=10, pady=10,
+                                                           sticky='nswe',
+                                                           columnspan=4)
+                                    exist_email = True
+                    if verificador == 0:
+                        texto_email_exist.destroy()
+                        senha_texto = Label(
+                            janela_cadastro,
+                            text='Crie uma senha'
+                        ).grid(column=0, row=1, padx=10, pady=10,
+                               sticky='nswe', columnspan=4)
 
-                global entry_senha_cadastro
-                entry_senha_cadastro = Entry(janela_cadastro)
-                entry_senha_cadastro.grid(column=0, row=2, padx=10, pady=10,
-                                          sticky='nswe', columnspan=4)
-                botao_senha = Button(janela_cadastro, text='Continuar',
-                                     command=func_senha).grid(column=0, row=3,
-                                                              padx=60, pady=10,
-                                                              sticky='nswe',
-                                                              columnspan=4)
-            else:
+                        global entry_senha_cadastro
+                        entry_senha_cadastro = Entry(janela_cadastro)
+                        entry_senha_cadastro.grid(column=0, row=2, padx=10,
+                                                  pady=10, sticky='nswe',
+                                                  columnspan=4)
+                        botao_senha = Button(janela_cadastro, text='Continuar',
+                                             command=func_senha)
+                        botao_senha.grid(column=0, row=3, padx=60, pady=10,
+                                         sticky='nswe', columnspan=4)
+                else:
+                    texto_erro_email = Label(
+                        janela_cadastro,
+                        text='Email inválido!',
+                        foreground='red'
+                    ).grid(column=0, row=1, padx=10, pady=10,
+                           sticky='nswe', columnspan=4)
+            except IndexError:
                 texto_erro_email = Label(
                     janela_cadastro,
                     text='Email inválido!',
@@ -158,25 +187,30 @@ def cadastrar():
                        sticky='nswe', columnspan=4)
 
         def func_senha():
-            if len(entry_senha_cadastro.get()) >= 8:
+            global cadastrado
+            if len(entry_senha_cadastro.get()) >= 8 \
+                    and cadastrado is not True:
                 texto_cadastro_fim = Label(
                     janela_cadastro,
                     text='Cadastro efetuado! Feche a janela.'
-                ).grid(column=0, row=4, padx=10, pady=10,
+                ).grid(column=0, row=1, padx=10, pady=10,
                        sticky='nswe', columnspan=4)
                 user = User(entry_nome.get(), entry_email.get(),
                             entry_senha_cadastro.get())
                 esc_csv.writerow([
                     user.nome, user.email,
                     user.senha])
-            else:
+                cadastrado = True
+            elif len(entry_senha_cadastro.get()) < 8 \
+                    and cadastrado is not True:
                 texto_erro_senha = Label(
                     janela_cadastro,
                     text='Digite uma senha mais forte',
                     foreground='red'
                 ).grid(column=0, row=1, padx=10, pady=10,
                        sticky='nswe', columnspan=4)
-
+            else:
+                janela_cadastro.destroy()
         janela_cadastro.mainloop()
         janela_principal()
 
