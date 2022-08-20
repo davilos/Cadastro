@@ -26,24 +26,19 @@ class Cadastro:
     def senha(self) -> str:
         return self.__senha
 
+    @property
+    # User reservado pelo sistema
     def user(self) -> str:
         return self.__email.split('@')[0]
 
 
 class User(Cadastro):
-    count = 0
 
     def __init__(self, nome: str, email: str, senha: str):
         super().__init__(nome, email, senha)
-        self.__num: int = User.count + 1
-        User.count = self.__num
 
     def __str__(self) -> str:
         return 'Essa é uma classe do tipo User'
-
-    @classmethod
-    def contador(cls) -> str:
-        return f'Temos {cls.count} usuário(s) no sistema.'
 
 
 def cadastrar():
@@ -97,7 +92,10 @@ def cadastrar():
                                 exist_user = True
 
                 if verificador == 0:
-                    texto_user_exist.destroy()
+                    try:
+                        texto_user_exist.destroy()
+                    except NameError:
+                        pass
                     email_texto = Label(
                         janela_cadastro,
                         text='Digite o seu email'
@@ -155,7 +153,10 @@ def cadastrar():
                                                            columnspan=4)
                                     exist_email = True
                     if verificador == 0:
-                        texto_email_exist.destroy()
+                        try:
+                            texto_email_exist.destroy()
+                        except NameError:
+                            pass
                         senha_texto = Label(
                             janela_cadastro,
                             text='Crie uma senha'
@@ -279,8 +280,8 @@ def logar():
                                 verify += 1
                                 bem_vindo_texto = Label(
                                     janela_logar,
-                                    text=f'Seja bem-vindo {n[0]}'
-                                ).grid(column=0, row=6, padx=10, pady=10,
+                                    text=f'Seja bem-vindo(a) {n[0]}'
+                                ).grid(column=0, row=5, padx=10, pady=10,
                                        sticky='nswe', columnspan=4)
                             else:
                                 pass
@@ -305,8 +306,8 @@ def logar():
                                 verify += 1
                                 bem_vindo_texto = Label(
                                     janela_logar,
-                                    text=f'Seja bem-vindo {n[0]}'
-                                ).grid(column=0, row=6, padx=10, pady=10,
+                                    text=f'Seja bem-vindo(a) {n[0]}'
+                                ).grid(column=0, row=5, padx=10, pady=10,
                                        sticky='nswe', columnspan=4)
                             else:
                                 pass
