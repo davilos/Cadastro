@@ -72,8 +72,12 @@ def cadastrar():
             if entry_nome.get() != '':
                 with open('usuarios.csv', 'r+') as arq2:
                     lei_csv = reader(arq2)
+                    next(lei_csv)
                     verificador = 0
+
                     for n in lei_csv:
+                        if len(n) != 3:
+                            break
                         if str(entry_nome.get()).upper() == n[0].upper():
                             verificador += 1
                             global exist_user
@@ -168,7 +172,7 @@ def cadastrar():
                         entry_senha_cadastro.grid(column=0, row=2, padx=10,
                                                   pady=10, sticky='nswe',
                                                   columnspan=4)
-                        botao_senha = Button(janela_cadastro, text='Continuar',
+                        botao_senha = Button(janela_cadastro, text='Cadastrar',
                                              command=func_senha)
                         botao_senha.grid(column=0, row=3, padx=60, pady=10,
                                          sticky='nswe', columnspan=4)
@@ -191,17 +195,12 @@ def cadastrar():
             global cadastrado
             if len(entry_senha_cadastro.get()) >= 8 \
                     and cadastrado is not True:
+                salvar()
                 texto_cadastro_fim = Label(
                     janela_cadastro,
                     text='Cadastro efetuado! Feche a janela.'
                 ).grid(column=0, row=1, padx=10, pady=10,
                        sticky='nswe', columnspan=4)
-                user = User(entry_nome.get(), entry_email.get(),
-                            entry_senha_cadastro.get())
-                esc_csv.writerow([
-                    user.nome, user.email,
-                    user.senha])
-                cadastrado = True
             elif len(entry_senha_cadastro.get()) < 8 \
                     and cadastrado is not True:
                 texto_erro_senha = Label(
@@ -212,8 +211,17 @@ def cadastrar():
                        sticky='nswe', columnspan=4)
             else:
                 janela_cadastro.destroy()
+
+        def salvar():
+            user = User(entry_nome.get(), entry_email.get(),
+                            entry_senha_cadastro.get())
+            esc_csv.writerow([
+                user.nome, user.email,
+                user.senha])
+            global cadastrado
+            cadastrado = True
+
         janela_cadastro.mainloop()
-        janela_principal()
 
 
 def logar():
